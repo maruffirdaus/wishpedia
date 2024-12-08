@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -27,13 +28,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.wishpedia.ui.theme.WishpediaTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditCategoryDialog(
     onDismissRequest: () -> Unit,
     onConfirmRequest: () -> Unit,
     categoryId: Int? = null,
-    viewModel: AddEditCategoryViewModel = hiltViewModel()
+    viewModel: AddEditCategoryViewModel = hiltViewModel(),
+    scope: CoroutineScope = rememberCoroutineScope()
 ) {
     LaunchedEffect(Unit) {
         categoryId?.let {
@@ -51,8 +55,10 @@ fun AddEditCategoryDialog(
                 onDismissRequest()
             },
             onConfirmRequest = {
-                viewModel.saveCategory()
-                onConfirmRequest()
+                scope.launch {
+                    viewModel.saveCategory()
+                    onConfirmRequest()
+                }
             }
         )
     }
