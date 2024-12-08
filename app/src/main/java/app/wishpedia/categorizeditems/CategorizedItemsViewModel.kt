@@ -174,4 +174,14 @@ class CategorizedItemsViewModel @Inject constructor(
             }
         }
     }
+    fun deleteCategory(){
+        _uiState.update { currentState ->
+            currentState.copy(isLoading = true)
+        }
+        viewModelScope.launch{
+            uiState.value.category?.let { category ->
+                appRepository.deleteCategory(category)
+            }
+        }
+    }
 }

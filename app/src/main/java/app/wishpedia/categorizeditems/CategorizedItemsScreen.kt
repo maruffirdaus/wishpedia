@@ -98,7 +98,7 @@ fun CategorizedItemsScreen(
         if (!uiState.deleteCategoryDialogState.isClosed) {
             DeleteCategoryDialog(
                 onDismissRequest = viewModel::hideDeleteCategoryDialog,
-                onConfirmRequest = {}
+                onConfirmRequest = viewModel::deleteCategory
             )
         }
         if (!uiState.addEditItemDialogState.isClosed) {

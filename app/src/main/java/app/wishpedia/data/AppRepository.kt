@@ -94,4 +94,8 @@ class AppRepository(
         }
         itemDao.delete(item)
     }
+
+    suspend fun deleteCategory(category: Category){
+        categoryDao.delete(category)
+    }
 }
