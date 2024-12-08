@@ -60,7 +60,7 @@ fun CategoryDrawer(
             if (!uiState.addEditCategoryDialogState.isClosed) {
                 AddEditCategoryDialog(
                     onDismissRequest = viewModel::hideAddEditCategoryDialog,
-                    onConfirmRequest = {}
+                    onConfirmRequest = {viewModel.getCategories()}
                 )
             }
         }

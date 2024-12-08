@@ -34,6 +34,8 @@ class AppRepository(
         }
     }
 
+    suspend fun addCategories(category: Category) = categoryDao.insert(category)
+
     suspend fun getCategories(): List<Category> = categoryDao.getCategories()
 
     suspend fun getCategory(id: Int): Category = categoryDao.getCategory(id)

@@ -50,7 +50,10 @@ fun AddEditCategoryDialog(
                 viewModel.resetUiState()
                 onDismissRequest()
             },
-            onConfirmRequest = onConfirmRequest
+            onConfirmRequest = {
+                viewModel.saveCategory()
+                onConfirmRequest()
+            }
         )
     }
 }
