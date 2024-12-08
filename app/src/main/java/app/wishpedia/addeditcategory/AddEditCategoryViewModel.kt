@@ -33,15 +33,13 @@ class AddEditCategoryViewModel @Inject constructor(
         }
     }
 
-    fun saveCategory() {
+    suspend fun saveCategory() {
         _uiState.update { currentState ->
             currentState.copy(isLoading = true)
         }
 
         val category = Category(id = 0, name = uiState.value.name)
-        viewModelScope.launch {
-            appRepository.addCategories(category)
-        }
+        appRepository.addCategories(category)
 
         _uiState.update { currentState ->
             currentState.copy(isLoading = false)

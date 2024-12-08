@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AddEditCategoryDialog(
     onDismissRequest: () -> Unit,
-    onConfirmRequest: () -> Unit,
+    onConfirmRequest: suspend () -> Unit,
     categoryId: Int? = null,
     viewModel: AddEditCategoryViewModel = hiltViewModel(),
     scope: CoroutineScope = rememberCoroutineScope()
