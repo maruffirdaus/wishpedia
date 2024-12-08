@@ -43,12 +43,13 @@ class CategoriesViewModel @Inject constructor(
         }
     }
 
-    suspend fun getCategories() {
-        appRepository.getCategories().let { categories ->
-            _uiState.update { currentState ->
-                currentState.copy(categories = categories)
+    fun getCategories() {
+        viewModelScope.launch {
+            appRepository.getCategories().let { categories ->
+                _uiState.update { currentState ->
+                    currentState.copy(categories = categories)
+                }
             }
         }
-
     }
 }

@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import app.wishpedia.data.AppRepository
 import app.wishpedia.data.source.entity.Category
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 data class AddEditCategoryUiState(
@@ -33,13 +35,15 @@ class AddEditCategoryViewModel @Inject constructor(
         }
     }
 
-    suspend fun saveCategory() {
+    fun saveCategory() {
         _uiState.update { currentState ->
             currentState.copy(isLoading = true)
         }
 
         val category = Category(id = 0, name = uiState.value.name)
-        appRepository.addCategories(category)
+        runBlocking {
+            appRepository.addCategories(category)
+        }
 
         _uiState.update { currentState ->
             currentState.copy(isLoading = false)

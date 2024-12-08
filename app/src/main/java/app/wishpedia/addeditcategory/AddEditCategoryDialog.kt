@@ -29,15 +29,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.wishpedia.ui.theme.WishpediaTheme
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditCategoryDialog(
     onDismissRequest: () -> Unit,
-    onConfirmRequest: suspend () -> Unit,
+    onConfirmRequest: () -> Unit,
     categoryId: Int? = null,
-    viewModel: AddEditCategoryViewModel = hiltViewModel(),
-    scope: CoroutineScope = rememberCoroutineScope()
+    viewModel: AddEditCategoryViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         categoryId?.let {
@@ -55,10 +55,8 @@ fun AddEditCategoryDialog(
                 onDismissRequest()
             },
             onConfirmRequest = {
-                scope.launch {
-                    viewModel.saveCategory()
-                    onConfirmRequest()
-                }
+                viewModel.saveCategory()
+                onConfirmRequest()
             }
         )
     }
