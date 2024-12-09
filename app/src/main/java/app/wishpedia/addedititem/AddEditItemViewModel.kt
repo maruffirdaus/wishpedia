@@ -88,46 +88,51 @@ class AddEditItemViewModel @Inject constructor(
         }
     }
 
-    suspend fun saveItem() {
+    fun saveItem(onSuccess: (() -> Unit)? = null) {
         _uiState.update { currentState ->
             currentState.copy(isLoading = true)
         }
-        val item = Item(
-            id = itemId,
-            categoryId = categoryId,
-            cardColorsId = uiState.value.cardColorsId,
-            name = uiState.value.name,
-            description = uiState.value.description.let {
-                it.ifEmpty {
-                    null
-                }
-            },
-            image = uiState.value.image,
-            price = uiState.value.price.let {
-                if (it.isNotEmpty()) {
-                    it.toInt()
-                } else {
-                    null
-                }
-            },
-            link = uiState.value.link.let {
-                it.ifEmpty {
-                    null
-                }
-            },
-            isPinned = isItemPinned
-        )
-        val tagIds: MutableList<Int> = mutableListOf()
-        uiState.value.selectedTags.forEachIndexed { index, value ->
-            if (value) tagIds += index
-        }
-        if (itemId == 0) {
-            appRepository.addItem(item, tagIds)
-        } else {
-            appRepository.updateItem(item, tagIds)
-        }
-        _uiState.update { currentState ->
-            currentState.copy(isLoading = false)
+        viewModelScope.launch {
+            val item = Item(
+                id = itemId,
+                categoryId = categoryId,
+                cardColorsId = uiState.value.cardColorsId,
+                name = uiState.value.name,
+                description = uiState.value.description.let {
+                    it.ifEmpty {
+                        null
+                    }
+                },
+                image = uiState.value.image,
+                price = uiState.value.price.let {
+                    if (it.isNotEmpty()) {
+                        it.toInt()
+                    } else {
+                        null
+                    }
+                },
+                link = uiState.value.link.let {
+                    it.ifEmpty {
+                        null
+                    }
+                },
+                isPinned = isItemPinned
+            )
+            val tagIds: MutableList<Int> = mutableListOf()
+            uiState.value.selectedTags.forEachIndexed { index, value ->
+                if (value) tagIds += index
+            }
+            if (itemId == 0) {
+                appRepository.addItem(item, tagIds)
+            } else {
+                appRepository.updateItem(item, tagIds)
+            }
+            _uiState.update { currentState ->
+                currentState.copy(isLoading = false)
+            }
+            onSuccess?.let { onSuccess ->
+                onSuccess()
+            }
         }
     }
 

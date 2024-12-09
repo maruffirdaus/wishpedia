@@ -29,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,24 +58,20 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
 import dev.chrisbanes.haze.materials.HazeMaterials
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import java.text.NumberFormat
 import java.util.Locale
 
 @Composable
 fun ItemDetailPopup(
     itemId: Int,
-    onDismissRequest: () -> Unit,
-    onItemChange: () -> Unit,
+    onDismissRequest: (Boolean) -> Unit,
     viewModel: ItemDetailViewModel = hiltViewModel(),
-    hazeState: HazeState = remember { HazeState() },
-    scope: CoroutineScope = rememberCoroutineScope()
+    hazeState: HazeState = remember { HazeState() }
 ) {
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) { viewModel.getItem(itemId) }
     Popup(
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = { onDismissRequest(uiState.isItemChanged) },
         properties = PopupProperties(focusable = true)
     ) {
         uiState.item?.let { item ->
@@ -85,15 +80,10 @@ fun ItemDetailPopup(
                     item = item,
                     tags = tags,
                     loading = uiState.isLoading,
-                    onPinButtonClick = {
-                        scope.launch {
-                            viewModel.updateItemPinnedState()
-                            onItemChange()
-                        }
-                    },
+                    onPinButtonClick = viewModel::updateItemPinnedState,
                     onEditButtonClick = viewModel::showAddEditItemDialog,
                     onDeleteButtonClick = viewModel::showDeleteItemDialog,
-                    onDismissRequest = onDismissRequest,
+                    onDismissRequest = { onDismissRequest(uiState.isItemChanged) },
                     hazeState = hazeState
                 )
             }
@@ -101,10 +91,11 @@ fun ItemDetailPopup(
     }
     if (!uiState.addEditItemDialogState.isClosed) {
         AddEditItemSheet(
-            onDismissRequest = viewModel::hideAddEditItemDialog,
-            onConfirmRequest = {
-                viewModel.refreshItem()
-                onItemChange()
+            onDismissRequest = { isEditItemSucceed ->
+                viewModel.hideAddEditItemDialog()
+                if (isEditItemSucceed) {
+                    viewModel.refreshItem()
+                }
             },
             itemId = uiState.item?.id
         )
@@ -112,12 +103,10 @@ fun ItemDetailPopup(
     if (!uiState.deleteItemDialogState.isClosed) {
         DeleteItemDialog(
             onDismissRequest = viewModel::hideDeleteItemDialog,
-            onConfirmRequest = {
-                scope.launch {
-                    viewModel.deleteItem()
-                    onDismissRequest()
-                    onItemChange()
-                }
+            onConfirmButtonClick = {
+                viewModel.deleteItem(
+                    onSucceed = { onDismissRequest(uiState.isItemChanged) }
+                )
             }
         )
     }
@@ -318,7 +307,7 @@ fun ItemDetailCard(
 @Composable
 fun DeleteItemDialog(
     onDismissRequest: () -> Unit,
-    onConfirmRequest: () -> Unit
+    onConfirmButtonClick: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Box(
@@ -350,7 +339,7 @@ fun DeleteItemDialog(
                     }
                     TextButton(
                         onClick = {
-                            onConfirmRequest()
+                            onConfirmButtonClick()
                             onDismissRequest()
                         }
                     ) {
@@ -385,7 +374,7 @@ private fun DeleteItemDialogPreview() {
     WishpediaTheme(dynamicColor = false) {
         DeleteItemDialog(
             onDismissRequest = {},
-            onConfirmRequest = {}
+            onConfirmButtonClick = {}
         )
     }
 }

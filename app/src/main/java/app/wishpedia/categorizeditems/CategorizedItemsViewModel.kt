@@ -115,30 +115,19 @@ class CategorizedItemsViewModel @Inject constructor(
     }
 
     fun initScreen(categoryId: Int) {
+        getCategory(categoryId)
+        getItems()
+    }
+
+    fun getCategory(categoryId: Int) {
         _uiState.update { currentState ->
             currentState.copy(isLoading = true)
         }
         viewModelScope.launch {
             appRepository.getCategory(categoryId).let { category ->
                 _uiState.update { currentState ->
-                    currentState.copy(category = category)
-                }
-            }
-            appRepository.getPinnedItems(categoryId).let { items ->
-                _uiState.update { currentState ->
                     currentState.copy(
-                        pinnedItems = items.map {
-                            SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
-                        }
-                    )
-                }
-            }
-            appRepository.getItems(categoryId).let { items ->
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        items = items.map {
-                            SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
-                        },
+                        category = category,
                         isLoading = false
                     )
                 }
@@ -174,13 +163,17 @@ class CategorizedItemsViewModel @Inject constructor(
             }
         }
     }
-    fun deleteCategory(){
+
+    fun deleteCategory(onSuccess: (() -> Unit)? = null){
         _uiState.update { currentState ->
             currentState.copy(isLoading = true)
         }
         viewModelScope.launch{
             uiState.value.category?.let { category ->
                 appRepository.deleteCategory(category)
+            }
+            onSuccess?.let { onSuccess ->
+                onSuccess()
             }
         }
     }

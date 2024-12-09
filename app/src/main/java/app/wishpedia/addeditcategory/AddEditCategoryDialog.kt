@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -28,35 +27,36 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.wishpedia.ui.theme.WishpediaTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditCategoryDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmRequest: () -> Unit,
+    onDismissRequest: (Boolean) -> Unit,
     categoryId: Int? = null,
     viewModel: AddEditCategoryViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         categoryId?.let {
-
+            viewModel.updateTitle("Edit category")
         }
     }
-    Dialog(onDismissRequest = onDismissRequest) {
+    Dialog(onDismissRequest = { onDismissRequest(false) }) {
         val uiState by viewModel.uiState.collectAsState()
         AddEditCategoryContent(
+            title = uiState.title,
             name = uiState.name,
             saveButtonEnabled = uiState.isSaveButtonEnabled,
             onNameChange = viewModel::updateName,
             onDismissRequest = {
                 viewModel.resetUiState()
-                onDismissRequest()
+                onDismissRequest(false)
             },
-            onConfirmRequest = {
-                viewModel.saveCategory()
-                onConfirmRequest()
+            onSaveButtonClick = {
+                viewModel.saveCategory(
+                    onSuccess = {
+                        viewModel.resetUiState()
+                        onDismissRequest(true)
+                    }
+                )
             }
         )
     }
@@ -64,11 +64,12 @@ fun AddEditCategoryDialog(
 
 @Composable
 fun AddEditCategoryContent(
+    title: String,
     name: String,
     saveButtonEnabled: Boolean,
     onNameChange: (String) -> Unit,
     onDismissRequest: () -> Unit,
-    onConfirmRequest: () -> Unit
+    onSaveButtonClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -79,7 +80,7 @@ fun AddEditCategoryContent(
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                "Add category",
+                title,
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.headlineSmall
             )
@@ -104,10 +105,7 @@ fun AddEditCategoryContent(
                     Text("Cancel")
                 }
                 TextButton(
-                    onClick = {
-                        onConfirmRequest()
-                        onDismissRequest()
-                    },
+                    onClick = onSaveButtonClick,
                     enabled = saveButtonEnabled
                 ) {
                     Text("Save")
@@ -123,11 +121,12 @@ fun AddEditCategoryContent(
 private fun AddEditCategoryContentPreview() {
     WishpediaTheme(dynamicColor = false) {
         AddEditCategoryContent(
+            title = "Add category",
             name = "",
             saveButtonEnabled = false,
             onNameChange = {},
             onDismissRequest = {},
-            onConfirmRequest = {}
+            onSaveButtonClick = {}
         )
     }
 }

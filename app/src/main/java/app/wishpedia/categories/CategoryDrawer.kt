@@ -22,6 +22,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.wishpedia.R
 import app.wishpedia.addeditcategory.AddEditCategoryDialog
 import app.wishpedia.data.source.entity.Category
@@ -39,7 +41,12 @@ fun CategoryDrawer(
     content: @Composable (() -> Unit) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    LaunchedEffect(Unit) { viewModel.getCategories() }
+    val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
+    LaunchedEffect(Unit) {
+        if (lifecycleState == Lifecycle.State.STARTED || lifecycleState == Lifecycle.State.RESUMED) {
+            viewModel.getCategories()
+        }
+    }
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -59,8 +66,12 @@ fun CategoryDrawer(
             }
             if (!uiState.addEditCategoryDialogState.isClosed) {
                 AddEditCategoryDialog(
-                    onDismissRequest = viewModel::hideAddEditCategoryDialog,
-                    onConfirmRequest = {viewModel.getCategories()}
+                    onDismissRequest = { isAddCategorySucceed ->
+                        viewModel.hideAddEditCategoryDialog()
+                        if (isAddCategorySucceed) {
+                            viewModel.getCategories()
+                        }
+                    }
                 )
             }
         }

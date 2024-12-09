@@ -16,6 +16,7 @@ data class ItemDetailUiState(
     val item: Item? = null,
     val tags: List<Tag>? = null,
     val isLoading: Boolean = false,
+    val isItemChanged: Boolean = false,
     val addEditItemDialogState: AddEditItemDialogState = AddEditItemDialogState(),
     val deleteItemDialogState: DeleteItemDialogState = DeleteItemDialogState()
 )
@@ -102,30 +103,41 @@ class ItemDetailViewModel @Inject constructor(
         }
     }
 
-    suspend fun updateItemPinnedState() {
+    fun updateItemPinnedState() {
         uiState.value.item?.let { item ->
             _uiState.update { currentState ->
                 currentState.copy(isLoading = true)
             }
-            appRepository.updateItemPinnedState(item).let { updatedItem ->
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        item = updatedItem,
-                        isLoading = false
-                    )
+            viewModelScope.launch {
+                appRepository.updateItemPinnedState(item).let { updatedItem ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            item = updatedItem,
+                            isLoading = false,
+                            isItemChanged = true
+                        )
+                    }
                 }
             }
         }
     }
 
-    suspend fun deleteItem() {
+    fun deleteItem(onSucceed: (() -> Unit)? = null) {
         uiState.value.item?.let { item ->
             _uiState.update { currentState ->
                 currentState.copy(isLoading = true)
             }
-            appRepository.deleteItem(item)
-            _uiState.update { currentState ->
-                currentState.copy(isLoading = false)
+            viewModelScope.launch {
+                appRepository.deleteItem(item)
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isLoading = false,
+                        isItemChanged = true
+                    )
+                }
+                onSucceed?.let { onSucceed ->
+                    onSucceed()
+                }
             }
         }
     }

@@ -41,7 +41,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,18 +57,14 @@ import app.wishpedia.ui.theme.WishpediaTheme
 import app.wishpedia.util.InitialDataSource
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditItemSheet(
-    onDismissRequest: () -> Unit,
-    onConfirmRequest: () -> Unit,
+    onDismissRequest: (Boolean) -> Unit,
     itemId: Int? = null,
     categoryId: Int? = null,
-    viewModel: AddEditItemViewModel = hiltViewModel(),
-    scope: CoroutineScope = rememberCoroutineScope()
+    viewModel: AddEditItemViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         itemId?.let { id ->
@@ -84,7 +79,7 @@ fun AddEditItemSheet(
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = {
             viewModel.resetUiState()
-            onDismissRequest()
+            onDismissRequest(false)
         }
     ) {
         val uiState by viewModel.uiState.collectAsState()
@@ -105,13 +100,13 @@ fun AddEditItemSheet(
             onPriceChange = viewModel::updatePrice,
             onLinkChange = viewModel::updateLink,
             onSelectedTagsChange = viewModel::updateSelectedTags,
-            onConfirmRequest = {
-                scope.launch {
-                    viewModel.saveItem()
-                    onConfirmRequest()
-                    viewModel.resetUiState()
-                    onDismissRequest()
-                }
+            onSaveButtonClick = {
+                viewModel.saveItem(
+                    onSuccess = {
+                        viewModel.resetUiState()
+                        onDismissRequest(true)
+                    }
+                )
             }
         )
     }
@@ -136,7 +131,7 @@ fun AddEditItemContent(
     onPriceChange: (String) -> Unit,
     onLinkChange: (String) -> Unit,
     onSelectedTagsChange: (Int) -> Unit,
-    onConfirmRequest: () -> Unit
+    onSaveButtonClick: () -> Unit
 ) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         val tags = remember { InitialDataSource.tags }
@@ -312,7 +307,7 @@ fun AddEditItemContent(
         )
         Spacer(modifier = Modifier.height(24.dp))
         Button(
-            onClick = onConfirmRequest,
+            onClick = onSaveButtonClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp),
@@ -383,7 +378,7 @@ private fun AddEditItemContentPreview() {
                 onPriceChange = {},
                 onLinkChange = {},
                 onSelectedTagsChange = {},
-                onConfirmRequest = {}
+                onSaveButtonClick = {}
             )
         }
     }

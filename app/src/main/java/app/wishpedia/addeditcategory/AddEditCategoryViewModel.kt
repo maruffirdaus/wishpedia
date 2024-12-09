@@ -5,15 +5,14 @@ import androidx.lifecycle.viewModelScope
 import app.wishpedia.data.AppRepository
 import app.wishpedia.data.source.entity.Category
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 data class AddEditCategoryUiState(
+    val title: String = "Add category",
     val name: String = "",
     val isSaveButtonEnabled: Boolean = false,
     val isLoading: Boolean = false
@@ -26,6 +25,14 @@ class AddEditCategoryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AddEditCategoryUiState())
     val uiState = _uiState.asStateFlow()
 
+    fun updateTitle(title: String) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                title = title
+            )
+        }
+    }
+
     fun updateName(name: String) {
         _uiState.update { currentState ->
             currentState.copy(
@@ -35,18 +42,19 @@ class AddEditCategoryViewModel @Inject constructor(
         }
     }
 
-    fun saveCategory() {
+    fun saveCategory(onSuccess: (() -> Unit)? = null) {
         _uiState.update { currentState ->
             currentState.copy(isLoading = true)
         }
-
-        val category = Category(id = 0, name = uiState.value.name)
-        runBlocking {
+        viewModelScope.launch {
+            val category = Category(id = 0, name = uiState.value.name)
             appRepository.addCategories(category)
-        }
-
-        _uiState.update { currentState ->
-            currentState.copy(isLoading = false)
+            _uiState.update { currentState ->
+                currentState.copy(isLoading = false)
+            }
+            onSuccess?.let { onSuccess ->
+                onSuccess()
+            }
         }
     }
 

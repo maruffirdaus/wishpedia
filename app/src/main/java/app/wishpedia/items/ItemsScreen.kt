@@ -104,16 +104,24 @@ fun ItemsScreen(
             )
             if (!uiState.addEditItemDialogState.isClosed) {
                 AddEditItemSheet(
-                    onDismissRequest = viewModel::hideAddEditItemDialog,
-                    onConfirmRequest = viewModel::getItems
+                    onDismissRequest = { isAddItemSucceed ->
+                        viewModel.hideAddEditItemDialog()
+                        if (isAddItemSucceed) {
+                            viewModel.getItems()
+                        }
+                    }
                 )
             }
             if (!uiState.itemDetailDialogState.isClosed) {
                 uiState.itemDetailDialogState.itemId?.let { id ->
                     ItemDetailPopup(
                         itemId = id,
-                        onDismissRequest = viewModel::hideItemDetailPopup,
-                        onItemChange = viewModel::getItems,
+                        onDismissRequest = { isItemChanged ->
+                            viewModel.hideItemDetailPopup()
+                            if (isItemChanged) {
+                                viewModel.getItems()
+                            }
+                        },
                         hazeState = hazeState
                     )
                 }

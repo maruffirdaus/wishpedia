@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import app.wishpedia.R
 import app.wishpedia.addeditcategory.AddEditCategoryDialog
 import app.wishpedia.addedititem.AddEditItemSheet
+import app.wishpedia.data.source.entity.Category
 import app.wishpedia.data.source.entity.SimplifiedItem
 import app.wishpedia.itemdetail.ItemDetailPopup
 import app.wishpedia.items.AddItemButton
@@ -68,7 +69,7 @@ fun CategorizedItemsScreen(
         topBar = {
             uiState.category?.let { category ->
                 CategorizedItemsTopAppBar(
-                    categoryName = category.name,
+                    category = category,
                     scrollBehavior = scrollBehavior,
                     onNavigationIconClick = onBack,
                     onEditButtonClick = viewModel::showAddEditCategoryDialog,
@@ -91,21 +92,31 @@ fun CategorizedItemsScreen(
         )
         if (!uiState.addEditCategoryDialogState.isClosed) {
             AddEditCategoryDialog(
-                onDismissRequest = viewModel::hideAddEditCategoryDialog,
-                onConfirmRequest = {}
+                onDismissRequest = { isEditCategorySucceed ->
+                    viewModel.hideAddEditCategoryDialog()
+                    if (isEditCategorySucceed) {
+                        viewModel.getCategory(categoryId)
+                    }
+                }
             )
         }
         if (!uiState.deleteCategoryDialogState.isClosed) {
             DeleteCategoryDialog(
                 onDismissRequest = viewModel::hideDeleteCategoryDialog,
-                onConfirmRequest = viewModel::deleteCategory
+                onConfirmButtonClick = {
+                    viewModel.deleteCategory(onSuccess = onBack)
+                }
             )
         }
         if (!uiState.addEditItemDialogState.isClosed) {
             uiState.category?.let { category ->
                 AddEditItemSheet(
-                    onDismissRequest = viewModel::hideAddEditItemDialog,
-                    onConfirmRequest = viewModel::getItems,
+                    onDismissRequest = { isAddItemSucceed ->
+                        viewModel.hideAddEditItemDialog()
+                        if (isAddItemSucceed) {
+                            viewModel.getItems()
+                        }
+                    },
                     categoryId = category.id,
                 )
             }
@@ -114,8 +125,12 @@ fun CategorizedItemsScreen(
             uiState.itemDetailDialogState.itemId?.let { id ->
                 ItemDetailPopup(
                     itemId = id,
-                    onDismissRequest = viewModel::hideItemDetailPopup,
-                    onItemChange = viewModel::getItems,
+                    onDismissRequest = { isItemChanged ->
+                        viewModel.hideItemDetailPopup()
+                        if (isItemChanged) {
+                            viewModel.getItems()
+                        }
+                    },
                     hazeState = hazeState
                 )
             }
@@ -126,7 +141,7 @@ fun CategorizedItemsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategorizedItemsTopAppBar(
-    categoryName: String,
+    category: Category,
     scrollBehavior: TopAppBarScrollBehavior,
     onNavigationIconClick: () -> Unit,
     onEditButtonClick: () -> Unit,
@@ -134,7 +149,7 @@ fun CategorizedItemsTopAppBar(
 ) {
     LargeTopAppBar(
         title = {
-            Text(categoryName)
+            Text(category.name)
         },
         navigationIcon = {
             IconButton(onClick = onNavigationIconClick) {
@@ -142,10 +157,16 @@ fun CategorizedItemsTopAppBar(
             }
         },
         actions = {
-            IconButton(onClick = onEditButtonClick) {
+            IconButton(
+                onClick = onEditButtonClick,
+                enabled = category.id != 1
+            ) {
                 Icon(painterResource(R.drawable.ic_edit), null)
             }
-            IconButton(onClick = onDeleteButtonClick) {
+            IconButton(
+                onClick = onDeleteButtonClick,
+                enabled = category.id != 1
+            ) {
                 Icon(painterResource(R.drawable.ic_delete), null)
             }
         },
@@ -206,7 +227,7 @@ fun CategorizedItemsContent(
 @Composable
 fun DeleteCategoryDialog(
     onDismissRequest: () -> Unit,
-    onConfirmRequest: () -> Unit
+    onConfirmButtonClick: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Box(
@@ -238,7 +259,7 @@ fun DeleteCategoryDialog(
                     }
                     TextButton(
                         onClick = {
-                            onConfirmRequest()
+                            onConfirmButtonClick()
                             onDismissRequest()
                         }
                     ) {
@@ -257,7 +278,7 @@ fun DeleteCategoryDialog(
 private fun CategorizedItemsTopAppBarPreview() {
     WishpediaTheme(dynamicColor = false) {
         CategorizedItemsTopAppBar(
-            categoryName = DummyDataSource.categories[0].name,
+            category = DummyDataSource.categories[0],
             scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(),
             onNavigationIconClick = {},
             onEditButtonClick = {},
@@ -287,7 +308,7 @@ private fun DeleteCategoryDialogPreview() {
     WishpediaTheme(dynamicColor = false) {
         DeleteCategoryDialog(
             onDismissRequest = {},
-            onConfirmRequest = {}
+            onConfirmButtonClick = {}
         )
     }
 }
