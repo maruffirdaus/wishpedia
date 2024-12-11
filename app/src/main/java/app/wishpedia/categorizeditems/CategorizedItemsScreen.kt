@@ -97,7 +97,8 @@ fun CategorizedItemsScreen(
                     if (isEditCategorySucceed) {
                         viewModel.getCategory(categoryId)
                     }
-                }
+                },
+                categoryId = categoryId
             )
         }
         if (!uiState.deleteCategoryDialogState.isClosed) {

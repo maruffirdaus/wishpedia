@@ -22,6 +22,7 @@ data class AddEditCategoryUiState(
 class AddEditCategoryViewModel @Inject constructor(
     val appRepository: AppRepository
 ) : ViewModel() {
+    private var id = 0
     private val _uiState = MutableStateFlow(AddEditCategoryUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -47,13 +48,36 @@ class AddEditCategoryViewModel @Inject constructor(
             currentState.copy(isLoading = true)
         }
         viewModelScope.launch {
-            val category = Category(id = 0, name = uiState.value.name)
-            appRepository.addCategories(category)
+            val category = Category(id = id, name = uiState.value.name)
+            if (id == 0){
+                appRepository.addCategories(category)
+            } else {
+                appRepository.updateCategories(category)
+            }
+
             _uiState.update { currentState ->
                 currentState.copy(isLoading = false)
             }
             onSuccess?.let { onSuccess ->
                 onSuccess()
+            }
+        }
+    }
+
+    fun getCategory(id:  Int) {
+        _uiState.update { currentState ->
+            currentState.copy(isLoading = true)
+        }
+
+        viewModelScope.launch {
+            appRepository.getCategory(id).let { category ->
+                this@AddEditCategoryViewModel.id = category.id
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        name = category.name,
+                        isLoading = false
+                    )
+                }
             }
         }
     }

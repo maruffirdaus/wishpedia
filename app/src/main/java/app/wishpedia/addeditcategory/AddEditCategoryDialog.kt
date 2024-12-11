@@ -35,8 +35,9 @@ fun AddEditCategoryDialog(
     viewModel: AddEditCategoryViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
-        categoryId?.let {
+        categoryId?.let { id ->
             viewModel.updateTitle("Edit category")
+            viewModel.getCategory(id)
         }
     }
     Dialog(onDismissRequest = { onDismissRequest(false) }) {
