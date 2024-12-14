@@ -1,4 +1,4 @@
-package app.wishpedia.categories
+package app.wishpedia.ui.categories
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,10 +25,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import app.wishpedia.R
-import app.wishpedia.addeditcategory.AddEditCategoryDialog
+import app.wishpedia.ui.addeditcategory.AddEditCategoryDialog
 import app.wishpedia.data.source.entity.Category
 import app.wishpedia.ui.theme.WishpediaTheme
-import app.wishpedia.util.DummyDataSource
+import app.wishpedia.utils.DummyDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -118,27 +118,6 @@ fun CategoryDrawerSheet(
             }
         }
     }
-}
-
-@Composable
-fun CategoryDrawerItem(
-    category: Category,
-    onCategoryClick: (Int) -> Unit
-) {
-    NavigationDrawerItem(
-        label = {
-            Text(
-                category.name,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.labelLarge
-            )
-        },
-        selected = false,
-        onClick = { onCategoryClick(category.id) },
-        icon = {
-            Icon(painterResource(R.drawable.ic_folder), null)
-        }
-    )
 }
 
 @Preview

@@ -1,10 +1,10 @@
-package app.wishpedia.addedititem
+package app.wishpedia.ui.addedititem
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.wishpedia.data.AppRepository
 import app.wishpedia.data.source.entity.Item
-import app.wishpedia.util.InitialDataSource
+import app.wishpedia.utils.InitialDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

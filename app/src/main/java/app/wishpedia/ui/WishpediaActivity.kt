@@ -1,4 +1,4 @@
-package app.wishpedia
+package app.wishpedia.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

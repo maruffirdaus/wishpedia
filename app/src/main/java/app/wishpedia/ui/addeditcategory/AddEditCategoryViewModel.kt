@@ -1,4 +1,4 @@
-package app.wishpedia.addeditcategory
+package app.wishpedia.ui.addeditcategory
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -50,11 +50,10 @@ class AddEditCategoryViewModel @Inject constructor(
         viewModelScope.launch {
             val category = Category(id = id, name = uiState.value.name)
             if (id == 0){
-                appRepository.addCategories(category)
+                appRepository.addCategory(category)
             } else {
-                appRepository.updateCategories(category)
+                appRepository.updateCategory(category)
             }
-
             _uiState.update { currentState ->
                 currentState.copy(isLoading = false)
             }
@@ -68,7 +67,6 @@ class AddEditCategoryViewModel @Inject constructor(
         _uiState.update { currentState ->
             currentState.copy(isLoading = true)
         }
-
         viewModelScope.launch {
             appRepository.getCategory(id).let { category ->
                 this@AddEditCategoryViewModel.id = category.id

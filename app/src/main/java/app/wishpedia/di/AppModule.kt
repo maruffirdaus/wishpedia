@@ -9,7 +9,7 @@ import app.wishpedia.data.source.AppDatabase
 import app.wishpedia.data.source.dao.CategoryDao
 import app.wishpedia.data.source.dao.ItemDao
 import app.wishpedia.data.source.dao.TagDao
-import app.wishpedia.util.InitialDataSource
+import app.wishpedia.utils.InitialDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

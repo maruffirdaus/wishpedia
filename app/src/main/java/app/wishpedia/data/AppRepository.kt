@@ -8,7 +8,7 @@ import app.wishpedia.data.source.dao.TagDao
 import app.wishpedia.data.source.entity.Category
 import app.wishpedia.data.source.entity.Item
 import app.wishpedia.data.source.entity.ItemTagCrossRef
-import app.wishpedia.util.ImageUtils
+import app.wishpedia.utils.ImageUtils
 import java.io.File
 
 class AppRepository(
@@ -17,6 +17,8 @@ class AppRepository(
     private val itemDao: ItemDao,
     private val tagDao: TagDao
 ) {
+    suspend fun addCategory(category: Category) = categoryDao.insert(category)
+
     suspend fun addItem(item: Item, tagIds: List<Int>) {
         var priorityPoint = 0
         item.image?.let { image ->
@@ -33,10 +35,6 @@ class AppRepository(
             itemDao.insert(ItemTagCrossRef(itemId.toInt(), tagId))
         }
     }
-
-    suspend fun addCategories(category: Category) = categoryDao.insert(category)
-
-    suspend fun updateCategories(category: Category) = categoryDao.update(category)
 
     suspend fun getCategories(): List<Category> = categoryDao.getCategories()
 
@@ -55,6 +53,8 @@ class AppRepository(
     suspend fun getItem(id: Int) = itemDao.getItem(id)
 
     suspend fun getItemWithTags(id: Int) = itemDao.getItemWithTags(id)
+
+    suspend fun updateCategory(category: Category) = categoryDao.update(category)
 
     suspend fun updateItem(item: Item, tagIds: List<Int>) {
         val itemId = item.id
@@ -90,14 +90,20 @@ class AppRepository(
         return item
     }
 
+    suspend fun deleteCategory(category: Category) {
+        itemDao.getItems(category.id).forEach { item ->
+            deleteItem(item)
+        }
+        categoryDao.delete(category)
+    }
+
     suspend fun deleteItem(item: Item) {
         item.image?.toUri()?.path?.let {
             File(it).delete()
         }
+        itemDao.getItemTagCrossRefs(item.id).forEach { itemTagCrossRef ->
+            itemDao.delete(itemTagCrossRef)
+        }
         itemDao.delete(item)
-    }
-
-    suspend fun deleteCategory(category: Category){
-        categoryDao.delete(category)
     }
 }

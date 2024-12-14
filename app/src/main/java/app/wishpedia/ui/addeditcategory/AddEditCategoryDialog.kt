@@ -1,4 +1,4 @@
-package app.wishpedia.addeditcategory
+package app.wishpedia.ui.addeditcategory
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -95,7 +95,8 @@ fun AddEditCategoryContent(
                 label = {
                     Text("Name")
                 },
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences)
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                singleLine = true
             )
             Spacer(modifier = Modifier.height(24.dp))
             Row(

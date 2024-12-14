@@ -1,4 +1,4 @@
-package app.wishpedia.categorizeditems
+package app.wishpedia.ui.categorizeditems
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -115,11 +115,6 @@ class CategorizedItemsViewModel @Inject constructor(
     }
 
     fun initScreen(categoryId: Int) {
-        getCategory(categoryId)
-        getItems()
-    }
-
-    fun getCategory(categoryId: Int) {
         _uiState.update { currentState ->
             currentState.copy(isLoading = true)
         }
@@ -127,9 +122,41 @@ class CategorizedItemsViewModel @Inject constructor(
             appRepository.getCategory(categoryId).let { category ->
                 _uiState.update { currentState ->
                     currentState.copy(
-                        category = category,
-                        isLoading = false
+                        category = category
                     )
+                }
+                appRepository.getPinnedItems(category.id).let { items ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            pinnedItems = items.map {
+                                SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
+                            }
+                        )
+                    }
+                }
+                appRepository.getItems(category.id).let { items ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            items = items.map {
+                                SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
+                            },
+                            isLoading = false
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun refreshCategory() {
+        uiState.value.category?.let { oldCategory ->
+            viewModelScope.launch {
+                appRepository.getCategory(oldCategory.id).let { newCategory ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            category = newCategory
+                        )
+                    }
                 }
             }
         }
@@ -164,10 +191,7 @@ class CategorizedItemsViewModel @Inject constructor(
         }
     }
 
-    fun deleteCategory(onSuccess: (() -> Unit)? = null){
-        _uiState.update { currentState ->
-            currentState.copy(isLoading = true)
-        }
+    fun deleteCategory(onSuccess: (() -> Unit)? = null) {
         viewModelScope.launch{
             uiState.value.category?.let { category ->
                 appRepository.deleteCategory(category)

@@ -1,10 +1,8 @@
-package app.wishpedia.addedititem
+package app.wishpedia.ui.addedititem
 
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -54,7 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import app.wishpedia.R
 import app.wishpedia.ui.theme.ItemCardColors
 import app.wishpedia.ui.theme.WishpediaTheme
-import app.wishpedia.util.InitialDataSource
+import app.wishpedia.utils.InitialDataSource
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 
@@ -318,41 +315,6 @@ fun AddEditItemContent(
             Text("Save")
         }
         Spacer(modifier = Modifier.height(16.dp))
-    }
-}
-
-@Composable
-fun ColorChip(
-    colors: ItemCardColors,
-    onClick: () -> Unit,
-    selected: Boolean = false,
-    enabled: Boolean = true,
-) {
-    Box(modifier = Modifier.padding(4.dp)) {
-        val modifier = Modifier
-            .width(40.dp)
-            .aspectRatio(1.0f)
-            .clip(CircleShape)
-        Box(
-            modifier = if (enabled) {
-                modifier
-                    .background(colors.containerColor)
-                    .clickable { onClick() }
-            } else {
-                modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12F))
-            },
-            contentAlignment = Alignment.Center
-        ) {
-            if (selected) Icon(
-                painter = painterResource(R.drawable.ic_check),
-                contentDescription = null,
-                tint = if (enabled) {
-                    colors.contentColor
-                } else {
-                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38F)
-                }
-            )
-        }
     }
 }
 

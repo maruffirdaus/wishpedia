@@ -1,4 +1,4 @@
-package app.wishpedia.categories
+package app.wishpedia.ui.categories
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

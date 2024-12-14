@@ -14,7 +14,7 @@
         android:theme="@style/Theme.Wishpedia"
         tools:targetApi="31">
         <activity
-            android:name=".WishpediaActivity"
+            android:name=".ui.WishpediaActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:screenOrientation="portrait"

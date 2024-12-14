@@ -1,4 +1,4 @@
-package app.wishpedia.util
+package app.wishpedia.utils
 
 import app.wishpedia.data.source.entity.Category
 import app.wishpedia.data.source.entity.Item
@@ -8,19 +8,19 @@ import app.wishpedia.data.source.entity.Tag
 object InitialDataSource {
     val category = Category(1, "Uncategorized")
     val tags = listOf(
-        Tag(0, "Other", 0),
-        Tag(1, "Work", 50),
-        Tag(2, "School", 50),
-        Tag(3, "Sport", 35),
-        Tag(4, "Hobby", 25),
-        Tag(5, "Game", 25)
+        Tag(id = 0, name = "Other", point = 0),
+        Tag(id = 1, name = "Work", point = 50),
+        Tag(id = 2, name = "School", point = 50),
+        Tag(id = 3, name = "Sport", point = 35),
+        Tag(id = 4, name = "Hobby", point = 25),
+        Tag(id = 5, name = "Game", point = 25)
     )
 }
 
 object DummyDataSource {
     val categories = listOf(
-        Category(2, "Gaming Devices"),
-        Category(1, "Uncategorized")
+        Category(id = 2, name = "Gaming Devices"),
+        Category(id = 1, name = "Uncategorized")
     )
     val item = Item(
         id = 0,
@@ -54,7 +54,7 @@ object DummyDataSource {
         )
     )
     val tags = listOf(
-        Tag(0, "Hobby", 25),
-        Tag(1, "Game", 25)
+        Tag(id = 0, name = "Hobby", point = 25),
+        Tag(id = 1, name = "Game", point = 25)
     )
 }

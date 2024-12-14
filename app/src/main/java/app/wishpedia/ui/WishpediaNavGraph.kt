@@ -1,4 +1,4 @@
-package app.wishpedia
+package app.wishpedia.ui
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -6,8 +6,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import app.wishpedia.categorizeditems.CategorizedItemsScreen
-import app.wishpedia.items.ItemsScreen
+import app.wishpedia.ui.categorizeditems.CategorizedItemsScreen
+import app.wishpedia.ui.items.ItemsScreen
 import kotlinx.serialization.Serializable
 
 object Screen {
