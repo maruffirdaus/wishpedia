@@ -141,4 +141,16 @@ class ItemDetailViewModel @Inject constructor(
             }
         }
     }
+
+    fun markItemAsDone(onSucceed: (() -> Unit)? = null) {
+        _uiState.update { currentState ->
+            currentState.copy(isLoading = true)
+        }
+        viewModelScope.launch {
+            uiState.value.item?.let { appRepository.markItemAsDone(it) }
+        }
+        onSucceed?.let {
+            it()
+        }
+    }
 }

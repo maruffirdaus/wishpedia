@@ -8,5 +8,5 @@ data class Tag(
     @PrimaryKey
     val id: Int,
     val name: String,
-    val point: Int
+    var point: Int
 )

@@ -59,6 +59,11 @@ fun ItemDetailPopup(
                     item = item,
                     tags = tags,
                     loading = uiState.isLoading,
+                    onMarkButtonClick = {
+                        viewModel.markItemAsDone {
+                            onDismissRequest(true)
+                        }
+                    },
                     onPinButtonClick = viewModel::updateItemPinnedState,
                     onEditButtonClick = viewModel::showAddEditItemDialog,
                     onDeleteButtonClick = viewModel::showDeleteItemDialog,
@@ -97,6 +102,7 @@ fun ItemDetailContent(
     item: Item,
     tags: List<Tag>,
     loading: Boolean,
+    onMarkButtonClick: () -> Unit,
     onPinButtonClick: () -> Unit,
     onEditButtonClick: () -> Unit,
     onDeleteButtonClick: () -> Unit,
@@ -135,7 +141,7 @@ fun ItemDetailContent(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     FilledIconButton(
-                        onClick = {}
+                        onClick = onMarkButtonClick
                     ) {
                         Icon(painterResource(R.drawable.ic_check), null)
                     }
@@ -183,6 +189,7 @@ private fun ItemDetailContentPreview() {
             item = DummyDataSource.item,
             tags = DummyDataSource.tags,
             loading = false,
+            onMarkButtonClick = {},
             onPinButtonClick = {},
             onEditButtonClick = {},
             onDeleteButtonClick = {},

@@ -19,19 +19,19 @@ interface ItemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(itemTagCrossRef: ItemTagCrossRef)
 
-    @Query("SELECT * FROM item ORDER BY priorityPoint DESC LIMIT :limit")
+    @Query("SELECT * FROM item WHERE isMarkedAsDone = FALSE ORDER BY priorityPoint DESC LIMIT :limit")
     suspend fun getHighestPriorityItems(limit: Int): List<Item>
 
-    @Query("SELECT * FROM item WHERE isPinned = true ORDER BY id DESC")
+    @Query("SELECT * FROM item WHERE isPinned = true AND isMarkedAsDone = FALSE ORDER BY id DESC")
     suspend fun getPinnedItems(): List<Item>
 
-    @Query("SELECT * FROM item WHERE categoryId = :categoryId AND isPinned = true ORDER BY id DESC")
+    @Query("SELECT * FROM item WHERE categoryId = :categoryId AND isPinned = true AND isMarkedAsDone = FALSE ORDER BY id DESC")
     suspend fun getPinnedItems(categoryId: Int): List<Item>
 
-    @Query("SELECT * FROM item ORDER BY id DESC")
+    @Query("SELECT * FROM item WHERE isMarkedAsDone = FALSE ORDER BY id DESC")
     suspend fun getItems(): List<Item>
 
-    @Query("SELECT * FROM item WHERE categoryId = :categoryId ORDER BY id DESC")
+    @Query("SELECT * FROM item WHERE categoryId = :categoryId AND isMarkedAsDone = FALSE ORDER BY id DESC")
     suspend fun getItems(categoryId: Int): List<Item>
 
     @Query("SELECT * FROM item WHERE id = :id")
@@ -42,7 +42,10 @@ interface ItemDao {
     suspend fun getItemWithTags(id: Int): ItemWithTags
 
     @Query("SELECT * FROM itemtagcrossref WHERE itemId = :itemId")
-    suspend fun getItemTagCrossRefs(itemId: Int): List<ItemTagCrossRef>
+    suspend fun getTagCrossRefs(itemId: Int): List<ItemTagCrossRef>
+
+    @Query("SELECT * FROM itemtagcrossref WHERE tagId = :tagId")
+    suspend fun getItemCrossRefs(tagId: Int): List<ItemTagCrossRef>
 
     @Update
     suspend fun update(item: Item)
