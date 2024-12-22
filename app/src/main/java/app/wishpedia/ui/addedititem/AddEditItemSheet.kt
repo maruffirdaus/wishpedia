@@ -75,8 +75,8 @@ fun AddEditItemSheet(
         modifier = Modifier.statusBarsPadding(),
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = {
-            viewModel.resetUiState()
             onDismissRequest(false)
+            viewModel.resetUiState()
         }
     ) {
         val uiState by viewModel.uiState.collectAsState()
@@ -100,8 +100,8 @@ fun AddEditItemSheet(
             onSaveButtonClick = {
                 viewModel.saveItem(
                     onSuccess = {
-                        viewModel.resetUiState()
                         onDismissRequest(true)
+                        viewModel.resetUiState()
                     }
                 )
             }

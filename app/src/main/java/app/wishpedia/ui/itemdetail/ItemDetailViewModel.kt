@@ -17,8 +17,13 @@ data class ItemDetailUiState(
     val tags: List<Tag>? = null,
     val isLoading: Boolean = false,
     val isItemChanged: Boolean = false,
+    val markItemAsDoneDialogState: MarkItemAsDoneDialogState = MarkItemAsDoneDialogState(),
     val addEditItemDialogState: AddEditItemDialogState = AddEditItemDialogState(),
     val deleteItemDialogState: DeleteItemDialogState = DeleteItemDialogState()
+)
+
+data class MarkItemAsDoneDialogState(
+    val isClosed: Boolean = true
 )
 
 data class AddEditItemDialogState(
@@ -35,6 +40,22 @@ class ItemDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ItemDetailUiState())
     val uiState = _uiState.asStateFlow()
+
+    fun showMarkItemAsDoneDialog() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                markItemAsDoneDialogState = MarkItemAsDoneDialogState(isClosed = false)
+            )
+        }
+    }
+
+    fun hideMarkItemAsDoneDialog() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                markItemAsDoneDialogState = MarkItemAsDoneDialogState(isClosed = true)
+            )
+        }
+    }
 
     fun showAddEditItemDialog() {
         _uiState.update { currentState ->
@@ -122,7 +143,7 @@ class ItemDetailViewModel @Inject constructor(
         }
     }
 
-    fun deleteItem(onSucceed: (() -> Unit)? = null) {
+    fun deleteItem(onSuccess: (() -> Unit)? = null) {
         uiState.value.item?.let { item ->
             _uiState.update { currentState ->
                 currentState.copy(isLoading = true)
@@ -135,22 +156,36 @@ class ItemDetailViewModel @Inject constructor(
                         isItemChanged = true
                     )
                 }
-                onSucceed?.let { onSucceed ->
-                    onSucceed()
+                if (onSuccess != null) {
+                    onSuccess()
                 }
             }
         }
     }
 
-    fun markItemAsDone(onSucceed: (() -> Unit)? = null) {
-        _uiState.update { currentState ->
-            currentState.copy(isLoading = true)
+    fun markItemAsDone(onSuccess: (() -> Unit)? = null) {
+        uiState.value.item?.let { item ->
+            _uiState.update { currentState ->
+                currentState.copy(isLoading = true)
+            }
+            viewModelScope.launch {
+                appRepository.markItemAsDone(item)
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isLoading = false,
+                        isItemChanged = true
+                    )
+                }
+                if (onSuccess != null) {
+                    onSuccess()
+                }
+            }
         }
-        viewModelScope.launch {
-            uiState.value.item?.let { appRepository.markItemAsDone(it) }
-        }
-        onSucceed?.let {
-            it()
+    }
+
+    fun resetUiState() {
+        _uiState.update { _ ->
+            ItemDetailUiState()
         }
     }
 }

@@ -74,6 +74,7 @@ fun ItemsScreen(
                 featuredItems = uiState.featuredItems,
                 pinnedItems = uiState.pinnedItems,
                 items = uiState.items,
+                doneItems = uiState.doneItems,
                 loading = uiState.isLoading,
                 onItemClick = { itemId ->
                     viewModel.showItemDetailPopup(itemId)
@@ -82,9 +83,9 @@ fun ItemsScreen(
             )
             if (!uiState.addEditItemDialogState.isClosed) {
                 AddEditItemSheet(
-                    onDismissRequest = { isAddItemSucceed ->
+                    onDismissRequest = { isAddItemSuccessful ->
                         viewModel.hideAddEditItemDialog()
-                        if (isAddItemSucceed) {
+                        if (isAddItemSuccessful) {
                             viewModel.getItems()
                         }
                     }
@@ -113,6 +114,7 @@ fun ItemsContent(
     featuredItems: List<SimplifiedItem>,
     pinnedItems: List<SimplifiedItem>,
     items: List<SimplifiedItem>,
+    doneItems: List<SimplifiedItem>,
     loading: Boolean,
     onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -127,26 +129,32 @@ fun ItemsContent(
             }
         }
 
-        items.isNotEmpty() -> {
+        items.isNotEmpty() || doneItems.isNotEmpty() -> {
             ItemsContentSkeleton(
                 items = items,
+                doneItems = doneItems,
                 onItemClick = onItemClick,
-                modifier = modifier
-            ) {
-                ItemsContentSection(
-                    title = "Featured",
-                    items = featuredItems,
-                    onItemClick = onItemClick
-                )
-                if (pinnedItems.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    ItemsContentSection(
-                        title = "Pinned",
-                        items = pinnedItems,
-                        onItemClick = onItemClick
-                    )
+                modifier = modifier,
+                topContent = if (featuredItems.isNotEmpty()) {
+                    {
+                        ItemsContentSection(
+                            title = "Featured",
+                            items = featuredItems,
+                            onItemClick = onItemClick
+                        )
+                        if (pinnedItems.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            ItemsContentSection(
+                                title = "Pinned",
+                                items = pinnedItems,
+                                onItemClick = onItemClick
+                            )
+                        }
+                    }
+                } else {
+                    null
                 }
-            }
+            )
         }
 
         else -> {
@@ -174,6 +182,7 @@ private fun ItemsContentPreview() {
                 featuredItems = DummyDataSource.items,
                 pinnedItems = DummyDataSource.items,
                 items = DummyDataSource.items,
+                doneItems = DummyDataSource.doneItems,
                 loading = false,
                 onItemClick = {}
             )

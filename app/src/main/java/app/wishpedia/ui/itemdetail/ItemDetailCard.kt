@@ -70,9 +70,9 @@ fun ItemDetailCard(
                     maxLines = 2,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                item.description?.let {
+                item.description?.let { description ->
                     Text(
-                        it,
+                        description,
                         color = contentColorVariant,
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 3,
@@ -106,12 +106,12 @@ fun ItemDetailCard(
                     .padding(top = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                item.price?.let {
+                item.price?.let { price ->
                     val numberFormat = NumberFormat.getNumberInstance(Locale.getDefault())
                     Text(
                         buildString {
                             append("Rp")
-                            append(numberFormat.format(it))
+                            append(numberFormat.format(price))
                         },
                         modifier = Modifier.weight(1.0f),
                         color = contentColorVariant,

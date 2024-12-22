@@ -50,7 +50,10 @@ fun ItemDetailPopup(
     val uiState by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) { viewModel.getItem(itemId) }
     Popup(
-        onDismissRequest = { onDismissRequest(uiState.isItemChanged) },
+        onDismissRequest = {
+            onDismissRequest(uiState.isItemChanged)
+            viewModel.resetUiState()
+        },
         properties = PopupProperties(focusable = true)
     ) {
         uiState.item?.let { item ->
@@ -59,25 +62,35 @@ fun ItemDetailPopup(
                     item = item,
                     tags = tags,
                     loading = uiState.isLoading,
-                    onMarkButtonClick = {
-                        viewModel.markItemAsDone {
-                            onDismissRequest(true)
-                        }
-                    },
+                    onMarkButtonClick = viewModel::showMarkItemAsDoneDialog,
                     onPinButtonClick = viewModel::updateItemPinnedState,
                     onEditButtonClick = viewModel::showAddEditItemDialog,
                     onDeleteButtonClick = viewModel::showDeleteItemDialog,
-                    onDismissRequest = { onDismissRequest(uiState.isItemChanged) },
+                    onDismissRequest = {
+                        onDismissRequest(uiState.isItemChanged)
+                        viewModel.resetUiState()
+                    },
                     hazeState = hazeState
                 )
             }
         }
     }
+    if (!uiState.markItemAsDoneDialogState.isClosed) {
+        MarkItemAsDoneDialog(
+            onDismissRequest = viewModel::hideMarkItemAsDoneDialog,
+            onConfirmButtonClick = {
+                viewModel.markItemAsDone(
+                    onSuccess = { onDismissRequest(true) }
+                )
+                viewModel.resetUiState()
+            }
+        )
+    }
     if (!uiState.addEditItemDialogState.isClosed) {
         AddEditItemSheet(
-            onDismissRequest = { isEditItemSucceed ->
+            onDismissRequest = { isEditItemSuccessful ->
                 viewModel.hideAddEditItemDialog()
-                if (isEditItemSucceed) {
+                if (isEditItemSuccessful) {
                     viewModel.refreshItem()
                 }
             },
@@ -89,8 +102,9 @@ fun ItemDetailPopup(
             onDismissRequest = viewModel::hideDeleteItemDialog,
             onConfirmButtonClick = {
                 viewModel.deleteItem(
-                    onSucceed = { onDismissRequest(uiState.isItemChanged) }
+                    onSuccess = { onDismissRequest(true) }
                 )
+                viewModel.resetUiState()
             }
         )
     }
@@ -140,26 +154,32 @@ fun ItemDetailContent(
                         .padding(horizontal = 36.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    FilledIconButton(
-                        onClick = onMarkButtonClick
-                    ) {
-                        Icon(painterResource(R.drawable.ic_check), null)
+                    Box {
+                        if (!item.isMarkedAsDone) {
+                            FilledIconButton(
+                                onClick = onMarkButtonClick
+                            ) {
+                                Icon(painterResource(R.drawable.ic_check), null)
+                            }
+                        }
                     }
                     Row {
-                        FilledTonalIconButton(
-                            onClick = onPinButtonClick
-                        ) {
-                            Icon(
-                                painterResource(
-                                    if (item.isPinned) R.drawable.ic_keep_off else R.drawable.ic_keep
-                                ),
-                                null
-                            )
-                        }
-                        FilledTonalIconButton(
-                            onClick = onEditButtonClick
-                        ) {
-                            Icon(painterResource(R.drawable.ic_edit), null)
+                        if (!item.isMarkedAsDone) {
+                            FilledTonalIconButton(
+                                onClick = onPinButtonClick
+                            ) {
+                                Icon(
+                                    painterResource(
+                                        if (item.isPinned) R.drawable.ic_keep_off else R.drawable.ic_keep
+                                    ),
+                                    null
+                                )
+                            }
+                            FilledTonalIconButton(
+                                onClick = onEditButtonClick
+                            ) {
+                                Icon(painterResource(R.drawable.ic_edit), null)
+                            }
                         }
                         FilledTonalIconButton(
                             onClick = onDeleteButtonClick
@@ -172,7 +192,11 @@ fun ItemDetailContent(
                 ItemDetailCard(
                     item = item,
                     tags = tags,
-                    itemCardColors = ItemCardColors.availableColors[item.cardColorsId],
+                    itemCardColors = if (!item.isMarkedAsDone) {
+                        ItemCardColors.availableColors[item.cardColorsId]
+                    } else {
+                        ItemCardColors.getDoneColors()
+                    },
                     modifier = Modifier.padding(horizontal = 36.dp)
                 )
                 Spacer(modifier = Modifier.height(36.dp))

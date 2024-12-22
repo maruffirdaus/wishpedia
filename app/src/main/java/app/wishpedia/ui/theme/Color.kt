@@ -1,5 +1,7 @@
 package app.wishpedia.ui.theme
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
 
@@ -85,23 +87,31 @@ data class ItemCardColors(
     companion object {
         val availableColors = listOf(
             ItemCardColors(
-                0,
-                Color(0xFFFFDDAE),
-                Color(0xFF281800),
-                Color(0xFF604100)
+                id = 0,
+                containerColor = Color(0xFFFFDDAE),
+                contentColor = Color(0xFF281800),
+                contentColorVariant = Color(0xFF604100)
             ),
             ItemCardColors(
-                1,
-                Color(0xFFFADEB9),
-                Color(0xFF271903),
-                Color(0xFF564428)
+                id = 1,
+                containerColor = Color(0xFFFADEB9),
+                contentColor = Color(0xFF271903),
+                contentColorVariant = Color(0xFF564428)
             ),
             ItemCardColors(
-                2,
-                Color(0xFFDBEA9C),
-                Color(0xFF181E00),
-                Color(0xFF404B0F)
+                id = 2,
+                containerColor = Color(0xFFDBEA9C),
+                contentColor = Color(0xFF181E00),
+                contentColorVariant = Color(0xFF404B0F)
             )
+        )
+
+        @Composable
+        fun getDoneColors() = ItemCardColors(
+            id = -1,
+            containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12F),
+            contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38F),
+            contentColorVariant = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38F)
         )
     }
 }

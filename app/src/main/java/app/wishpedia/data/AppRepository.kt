@@ -50,6 +50,10 @@ class AppRepository(
 
     suspend fun getItems(categoryId: Int) = itemDao.getItems(categoryId)
 
+    suspend fun getDoneItems() = itemDao.getDoneItems()
+
+    suspend fun getDoneItems(categoryId: Int) = itemDao.getDoneItems(categoryId)
+
     suspend fun getItem(id: Int) = itemDao.getItem(id)
 
     suspend fun getItemWithTags(id: Int) = itemDao.getItemWithTags(id)
@@ -59,7 +63,7 @@ class AppRepository(
     suspend fun updateItem(item: Item, tagIds: List<Int>) {
         val itemId = item.id
         val oldItem = itemDao.getItem(itemId)
-        val oldItemTagCrossRefs = itemDao.getTagCrossRefs(itemId)
+        val oldItemTagCrossRefs = itemDao.getItemTagCrossRefsByItemId(itemId)
         var priorityPoint = 0
         if (item.image != oldItem.image) {
             oldItem.image?.toUri()?.path?.let {
@@ -90,6 +94,27 @@ class AppRepository(
         return item
     }
 
+    suspend fun markItemAsDone(item: Item){
+        itemDao.getItemTagCrossRefsByItemId(item.id).forEach { outerIds ->
+            if (outerIds.tagId != 0) {
+                val tag = tagDao.getTag(outerIds.tagId)
+                tag.point += 5
+                tagDao.update(tag)
+                itemDao.getItemTagCrossRefsByTagId(outerIds.tagId).forEach { innerIds ->
+                    val refItem = itemDao.getItem(innerIds.itemId)
+                    if (!refItem.isMarkedAsDone) {
+                        val refIds = itemDao.getItemTagCrossRefsByItemId(refItem.id)
+                        refItem.priorityPoint =
+                            (refItem.priorityPoint * refIds.size + 5) / refIds.size
+                        itemDao.update(refItem)
+                    }
+                }
+            }
+        }
+        item.isMarkedAsDone = true
+        itemDao.update(item)
+    }
+
     suspend fun deleteCategory(category: Category) {
         itemDao.getItems(category.id).forEach { item ->
             deleteItem(item)
@@ -101,25 +126,9 @@ class AppRepository(
         item.image?.toUri()?.path?.let {
             File(it).delete()
         }
-        itemDao.getTagCrossRefs(item.id).forEach { itemTagCrossRef ->
+        itemDao.getItemTagCrossRefsByItemId(item.id).forEach { itemTagCrossRef ->
             itemDao.delete(itemTagCrossRef)
         }
         itemDao.delete(item)
-    }
-
-    suspend fun markItemAsDone(item: Item){
-        itemDao.getTagCrossRefs(item.id).forEach { outerId ->
-            val tag = tagDao.getTag(outerId.tagId)
-            tag.point += 5
-            tagDao.update(tag)
-            itemDao.getItemCrossRefs(outerId.tagId).forEach{ innerId ->
-                val refItem = itemDao.getItem(innerId.itemId)
-                val refTagIds = itemDao.getTagCrossRefs(refItem.id)
-                refItem.priorityPoint = (refItem.priorityPoint * refTagIds.size + 5) / refTagIds.size
-                itemDao.update(refItem)
-            }
-        }
-        item.isMarkedAsDone = true
-        itemDao.update(item)
     }
 }

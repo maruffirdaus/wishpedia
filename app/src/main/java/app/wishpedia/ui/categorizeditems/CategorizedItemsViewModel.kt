@@ -16,6 +16,7 @@ data class CategorizedItemsUiState(
     val category: Category? = null,
     val pinnedItems: List<SimplifiedItem> = listOf(),
     val items: List<SimplifiedItem> = listOf(),
+    val doneItems: List<SimplifiedItem> = listOf(),
     val isLoading: Boolean = false,
     val addEditCategoryDialogState: AddEditCategoryDialogState = AddEditCategoryDialogState(),
     val deleteCategoryDialogState: DeleteCategoryDialogState = DeleteCategoryDialogState(),
@@ -139,6 +140,15 @@ class CategorizedItemsViewModel @Inject constructor(
                         currentState.copy(
                             items = items.map {
                                 SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
+                            }
+                        )
+                    }
+                }
+                appRepository.getDoneItems(category.id).let { items ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            doneItems = items.map {
+                                SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
                             },
                             isLoading = false
                         )
@@ -182,6 +192,15 @@ class CategorizedItemsViewModel @Inject constructor(
                         currentState.copy(
                             items = items.map {
                                 SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
+                            }
+                        )
+                    }
+                }
+                appRepository.getDoneItems(category.id).let { items ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            doneItems = items.map {
+                                SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
                             },
                             isLoading = false
                         )
@@ -196,7 +215,7 @@ class CategorizedItemsViewModel @Inject constructor(
             uiState.value.category?.let { category ->
                 appRepository.deleteCategory(category)
             }
-            onSuccess?.let { onSuccess ->
+            if (onSuccess != null) {
                 onSuccess()
             }
         }

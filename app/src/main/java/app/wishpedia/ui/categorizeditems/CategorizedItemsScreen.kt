@@ -3,9 +3,7 @@ package app.wishpedia.ui.categorizeditems
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +22,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import app.wishpedia.data.source.entity.SimplifiedItem
 import app.wishpedia.ui.addeditcategory.AddEditCategoryDialog
@@ -71,6 +68,7 @@ fun CategorizedItemsScreen(
         CategorizedItemsContent(
             pinnedItems = uiState.pinnedItems,
             items = uiState.items,
+            doneItems = uiState.doneItems,
             loading = uiState.isLoading,
             onItemClick = { itemId ->
                 viewModel.showItemDetailPopup(itemId)
@@ -79,9 +77,9 @@ fun CategorizedItemsScreen(
         )
         if (!uiState.addEditCategoryDialogState.isClosed) {
             AddEditCategoryDialog(
-                onDismissRequest = { isEditCategorySucceed ->
+                onDismissRequest = { isEditCategorySuccessful ->
                     viewModel.hideAddEditCategoryDialog()
-                    if (isEditCategorySucceed) {
+                    if (isEditCategorySuccessful) {
                         viewModel.refreshCategory()
                     }
                 },
@@ -99,9 +97,9 @@ fun CategorizedItemsScreen(
         if (!uiState.addEditItemDialogState.isClosed) {
             uiState.category?.let { category ->
                 AddEditItemSheet(
-                    onDismissRequest = { isAddItemSucceed ->
+                    onDismissRequest = { isAddItemSuccessful ->
                         viewModel.hideAddEditItemDialog()
-                        if (isAddItemSucceed) {
+                        if (isAddItemSuccessful) {
                             viewModel.getItems()
                         }
                     },
@@ -130,6 +128,7 @@ fun CategorizedItemsScreen(
 fun CategorizedItemsContent(
     pinnedItems: List<SimplifiedItem>,
     items: List<SimplifiedItem>,
+    doneItems: List<SimplifiedItem>,
     loading: Boolean,
     onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -144,21 +143,24 @@ fun CategorizedItemsContent(
             }
         }
 
-        items.isNotEmpty() -> {
+        items.isNotEmpty() || doneItems.isNotEmpty() -> {
             ItemsContentSkeleton(
                 items = items,
+                doneItems = doneItems,
                 onItemClick = onItemClick,
-                modifier = modifier
-            ) {
-                if (pinnedItems.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    ItemsContentSection(
-                        title = "Pinned",
-                        items = pinnedItems,
-                        onItemClick = onItemClick
-                    )
+                modifier = modifier,
+                topContent = if (pinnedItems.isNotEmpty()) {
+                    {
+                        ItemsContentSection(
+                            title = "Pinned",
+                            items = pinnedItems,
+                            onItemClick = onItemClick
+                        )
+                    }
+                } else {
+                    null
                 }
-            }
+            )
         }
 
         else -> {
@@ -185,6 +187,7 @@ private fun CategorizedItemsContentPreview() {
             CategorizedItemsContent(
                 pinnedItems = DummyDataSource.items,
                 items = DummyDataSource.items,
+                doneItems = DummyDataSource.doneItems,
                 loading = false,
                 onItemClick = {}
             )

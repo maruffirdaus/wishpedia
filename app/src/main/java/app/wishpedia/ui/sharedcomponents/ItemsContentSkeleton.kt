@@ -25,9 +25,10 @@ import app.wishpedia.utils.DummyDataSource
 @Composable
 fun ItemsContentSkeleton(
     items: List<SimplifiedItem>,
+    doneItems: List<SimplifiedItem>,
     onItemClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
+    topContent: (@Composable () -> Unit)? = null
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -38,9 +39,15 @@ fun ItemsContentSkeleton(
     ) {
         item(span = { GridItemSpan(2) }) {
             Column {
-                Spacer(modifier = Modifier.height(16.dp))
-                content()
-                Spacer(modifier = Modifier.height(24.dp))
+                if (topContent != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    topContent()
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+        if (items.isNotEmpty()) {
+            item(span = { GridItemSpan(2) }) {
                 Text(
                     "All",
                     modifier = Modifier.padding(horizontal = 24.dp),
@@ -48,18 +55,41 @@ fun ItemsContentSkeleton(
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+            itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
+                ItemCard(
+                    item = item,
+                    itemCardColors = ItemCardColors.availableColors[item.cardColorsId],
+                    onClick = { onItemClick(item.id) },
+                    modifier = if (index % 2 == 0) {
+                        Modifier.padding(start = 24.dp)
+                    } else {
+                        Modifier.padding(end = 24.dp)
+                    }
+                )
+            }
         }
-        itemsIndexed(items, key = { _, item -> item.id }) { index, item ->
-            ItemCard(
-                item = item,
-                itemCardColors = ItemCardColors.availableColors[item.cardColorsId],
-                onClick = { onItemClick(item.id) },
-                modifier = if (index % 2 == 0) {
-                    Modifier.padding(start = 24.dp)
-                } else {
-                    Modifier.padding(end = 24.dp)
-                }
-            )
+        if (doneItems.isNotEmpty()) {
+            item(span = { GridItemSpan(2) }) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Done",
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+            itemsIndexed(doneItems, key = { _, item -> item.id }) { index, item ->
+                ItemCard(
+                    item = item,
+                    itemCardColors = ItemCardColors.getDoneColors(),
+                    onClick = { onItemClick(item.id) },
+                    modifier = if (index % 2 == 0) {
+                        Modifier.padding(start = 24.dp)
+                    } else {
+                        Modifier.padding(end = 24.dp)
+                    }
+                )
+            }
         }
         item(span = { GridItemSpan(2) }) {
             Spacer(modifier = Modifier.height(72.dp))
@@ -74,8 +104,9 @@ private fun ItemsContentSkeletonPreview() {
         Surface {
             ItemsContentSkeleton(
                 items = DummyDataSource.items,
+                doneItems = DummyDataSource.doneItems,
                 onItemClick = {}
-            ) {}
+            )
         }
     }
 }

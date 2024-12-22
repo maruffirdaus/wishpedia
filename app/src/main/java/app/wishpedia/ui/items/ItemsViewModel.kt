@@ -15,6 +15,7 @@ data class ItemsUiState(
     val featuredItems: List<SimplifiedItem> = listOf(),
     val pinnedItems: List<SimplifiedItem> = listOf(),
     val items: List<SimplifiedItem> = listOf(),
+    val doneItems: List<SimplifiedItem> = listOf(),
     val isLoading: Boolean = false,
     val addEditItemDialogState: AddEditItemDialogState = AddEditItemDialogState(),
     val itemDetailDialogState: ItemDetailDialogState = ItemDetailDialogState()
@@ -98,6 +99,15 @@ class ItemsViewModel @Inject constructor(
                 _uiState.update { currentState ->
                     currentState.copy(
                         items = items.map {
+                            SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
+                        }
+                    )
+                }
+            }
+            appRepository.getDoneItems().let { items ->
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        doneItems = items.map {
                             SimplifiedItem(it.id, it.cardColorsId, it.name, it.description, it.price)
                         },
                         isLoading = false

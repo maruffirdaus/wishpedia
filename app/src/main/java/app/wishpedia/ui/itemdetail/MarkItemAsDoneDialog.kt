@@ -22,7 +22,7 @@ import androidx.compose.ui.window.Dialog
 import app.wishpedia.ui.theme.WishpediaTheme
 
 @Composable
-fun DeleteItemDialog(
+fun MarkItemAsDoneDialog(
     onDismissRequest: () -> Unit,
     onConfirmButtonClick: () -> Unit
 ) {
@@ -36,13 +36,13 @@ fun DeleteItemDialog(
             Column(modifier = Modifier.padding(horizontal = 24.dp)) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
-                    "Delete item?",
+                    "Mark item as done?",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineSmall
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    "This item will be deleted",
+                    "This item will be marked as done",
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodyMedium
                 )
@@ -68,9 +68,9 @@ fun DeleteItemDialog(
 
 @Preview
 @Composable
-private fun DeleteItemDialogPreview() {
+private fun MarkItemAsDoneDialogPreview() {
     WishpediaTheme(dynamicColor = false) {
-        DeleteItemDialog(
+        MarkItemAsDoneDialog(
             onDismissRequest = {},
             onConfirmButtonClick = {}
         )

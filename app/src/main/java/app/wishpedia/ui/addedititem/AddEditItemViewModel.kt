@@ -130,7 +130,7 @@ class AddEditItemViewModel @Inject constructor(
             _uiState.update { currentState ->
                 currentState.copy(isLoading = false)
             }
-            onSuccess?.let { onSuccess ->
+            if (onSuccess != null) {
                 onSuccess()
             }
         }
