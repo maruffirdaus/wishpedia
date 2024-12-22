@@ -119,6 +119,9 @@ class AppRepository(
         itemDao.getItems(category.id).forEach { item ->
             deleteItem(item)
         }
+        itemDao.getDoneItems(category.id).forEach { item ->
+            deleteItem(item)
+        }
         categoryDao.delete(category)
     }
 
