@@ -54,8 +54,6 @@ class AppRepository(
 
     suspend fun getDoneItems(categoryId: Int) = itemDao.getDoneItems(categoryId)
 
-    suspend fun getItem(id: Int) = itemDao.getItem(id)
-
     suspend fun getItemWithTags(id: Int) = itemDao.getItemWithTags(id)
 
     suspend fun updateCategory(category: Category) = categoryDao.update(category)
@@ -69,9 +67,9 @@ class AppRepository(
             oldItem.image?.toUri()?.path?.let {
                 File(it).delete()
             }
-        }
-        item.image?.let { image ->
-            item.image = ImageUtils.storeImage(context, image.toUri()).toString()
+            item.image?.let { image ->
+                item.image = ImageUtils.storeImage(context, image.toUri()).toString()
+            }
         }
         tagIds.forEach { tagId ->
             val tag = tagDao.getTag(tagId)
@@ -94,25 +92,25 @@ class AppRepository(
         return item
     }
 
-    suspend fun markItemAsDone(item: Item){
-        itemDao.getItemTagCrossRefsByItemId(item.id).forEach { outerIds ->
-            if (outerIds.tagId != 0) {
-                val tag = tagDao.getTag(outerIds.tagId)
+    suspend fun markItemAsDone(item: Item) {
+        item.isMarkedAsDone = true
+        itemDao.update(item)
+        itemDao.getItemTagCrossRefsByItemId(item.id).forEach { idsForTag ->
+            if (idsForTag.tagId != 0) {
+                val tag = tagDao.getTag(idsForTag.tagId)
                 tag.point += 5
                 tagDao.update(tag)
-                itemDao.getItemTagCrossRefsByTagId(outerIds.tagId).forEach { innerIds ->
-                    val refItem = itemDao.getItem(innerIds.itemId)
+                itemDao.getItemTagCrossRefsByTagId(idsForTag.tagId).forEach { idsForItem ->
+                    val refItem = itemDao.getItem(idsForItem.itemId)
                     if (!refItem.isMarkedAsDone) {
-                        val refIds = itemDao.getItemTagCrossRefsByItemId(refItem.id)
+                        val tagsSize = itemDao.getItemTagCrossRefsByItemId(refItem.id).size
                         refItem.priorityPoint =
-                            (refItem.priorityPoint * refIds.size + 5) / refIds.size
+                            (refItem.priorityPoint * tagsSize + 5) / tagsSize
                         itemDao.update(refItem)
                     }
                 }
             }
         }
-        item.isMarkedAsDone = true
-        itemDao.update(item)
     }
 
     suspend fun deleteCategory(category: Category) {

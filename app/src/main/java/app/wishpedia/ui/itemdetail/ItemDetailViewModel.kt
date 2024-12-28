@@ -112,10 +112,11 @@ class ItemDetailViewModel @Inject constructor(
         }
         viewModelScope.launch {
             uiState.value.item?.id?.let { id ->
-                appRepository.getItem(id).let { item ->
+                appRepository.getItemWithTags(id).let { itemWithTags ->
                     _uiState.update { currentState ->
                         currentState.copy(
-                            item = item,
+                            item = itemWithTags.item,
+                            tags = itemWithTags.tags,
                             isLoading = false
                         )
                     }
